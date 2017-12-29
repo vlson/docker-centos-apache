@@ -19,32 +19,25 @@ RUN tar -jxf apr-1.5.2.tar.bz2 && tar -jxf apr-util-1.5.4.tar.bz2 && unzip pcre-
 
 #编译安装依赖包
 WORKDIR apr-1.5.2
-RUN ./configure --prefix=/usr/local/apr
-RUN make 
-RUN make install
+RUN ./configure --prefix=/usr/local/apr && make && make install
 
 WORKDIR /package/apr-util-1.5.4
-RUN ./configure --prefix=/usr/local/apr-util --with-apr=/usr/local/apr/bin/apr-1-config
-RUN make 
-RUN make install
+RUN ./configure --prefix=/usr/local/apr-util --with-apr=/usr/local/apr/bin/apr-1-config && make && make install
 
 WORKDIR /package/pcre-8.10
-RUN ./configure --prefix=/usr/local/pcre
-RUN make 
-RUN make install
+RUN ./configure --prefix=/usr/local/pcre && make && make install
 
 #下载并解压源码包
 WORKDIR /package
 RUN wget http://archive.apache.org/dist/httpd/httpd-2.4.20.tar.gz 
 RUN tar -zxvf httpd-2.4.20.tar.gz
 WORKDIR httpd-2.4.20
-RUN ./configure --prefix=/usr/local/apache --enable-so --with-apr=/usr/local/apr --with-apr-util=/usr/local/apr-util --with-pcre=/usr/local/pcre 
-RUN make 
-RUN make install
+RUN ./configure --prefix=/usr/local/apache --enable-so --with-apr=/usr/local/apr --with-apr-util=/usr/local/apr-util --with-pcre=/usr/local/pcre  && make && make install
 
 #修改apache配置文件
 RUN sed -i 's/#ServerName www.example.com:80/ServerName localhost:80/g' /usr/local/apache/conf/httpd.conf
-
+#删除无用的文件包
+RUN rm -f /package/apr-1.5.2.tar.bz2 && rm -f /package/apr-util-1.5.4.tar.bz2 && rm -f /package/httpd-2.4.20.tar.gz && rm -f /package/pcre-8.10.zip
 # 启动服务
 RUN /usr/local/apache/bin/httpd
 
